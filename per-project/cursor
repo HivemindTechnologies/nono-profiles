@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# One sandboxed Cursor per project directory (default: current directory).
+# Each project gets its own Cursor data dir, so its own login, settings and extensions.
+# Usage: cursor [dir] [cursor args...]
+set -euo pipefail
+dir=$(realpath "${1:-.}")
+shift || true
+# State dir name mirrors the absolute path: /home/me/workbench/foo -> home-me-workbench-foo
+slug=$(sed 's|^/||; s|/|-|g' <<<"$dir")
+exec "$(dirname "$(realpath "$0")")/../launch.sh" "$dir" "per-project/$slug" "$@"
