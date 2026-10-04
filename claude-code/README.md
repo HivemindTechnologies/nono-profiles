@@ -5,13 +5,6 @@ cd ~/workbench/my-project
 nix develop -c ~/workbench/cursor-nono/claude-code/claude-nono --dangerously-skip-permissions
 ```
 
-The sandbox is the safety boundary, so skipping Claude's own permission
-prompts is reasonable. `nix develop` is optional; it gives Claude your
-project's tools, because nix itself does not work inside the sandbox.
-
-`claude-nono` runs `claude` from your PATH. If `claude` on your PATH is
-already a sandbox wrapper, point `CLAUDE_BIN` at the plain binary.
-
 ## What Claude Can Access
 
 | Access                         | Paths                                                        |
