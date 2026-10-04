@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "name": "claude-code",
+    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland) and /tmp are blocked. Start via the `claude` launcher, which grants the workdir and a private TMPDIR."
+  },
+  "extends": "default",
+  "groups": {
+    "include": ["nix_runtime", "git_config"],
+    "exclude": ["system_write_linux"]
+  },
+  "linux": {
+    "af_unix_mediation": "pathname"
+  },
+  "filesystem": {
+    "allow": [
+      "$HOME/.claude",
+      "$HOME/.cache/claude",
+      "$HOME/.cache/claude-cli-nodejs",
+      "$HOME/.local/state/claude",
+
+      "$HOME/.cargo",
+      "$HOME/.rustup",
+      "$HOME/.sbt",
+      "$HOME/.ivy2",
+      "$HOME/.cache/coursier",
+      "$HOME/.npm",
+      "$HOME/.local/share/pnpm",
+      "$HOME/.cache/pip",
+      "$HOME/.cache/uv",
+
+      "/dev/pts"
+    ],
+    "allow_file": [
+      "$HOME/.claude.json",
+      "$HOME/.claude.json.lock",
+      "$HOME/.claude.lock",
+      "/dev/null",
+      "/dev/zero",
+      "/dev/full",
+      "/dev/tty"
+    ],
+    "unix_socket": [
+      "/run/nscd/socket"
+    ],
+    "read_file": [
+      "/etc/passwd",
+      "/etc/group",
+      "/etc/machine-id"
+    ]
+  },
+  "environment": {
+    "deny_vars": [
+      "DBUS_SESSION_BUS_ADDRESS",
+      "DISPLAY",
+      "WAYLAND_DISPLAY",
+      "SSH_AUTH_SOCK",
+      "SSH_ASKPASS",
+      "SUDO_ASKPASS",
+      "XDG_RUNTIME_DIR"
+    ]
+  },
+  "open_urls": {
+    "allow_origins": [
+      "https://claude.ai",
+      "https://claude.com",
+      "https://platform.claude.com",
+      "https://console.anthropic.com"
+    ],
+    "allow_localhost": true
+  }
+}

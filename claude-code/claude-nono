@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Run Claude Code inside the nono sandbox defined by claude-code.profile.json.
+# The current directory is the only project directory the sandbox can read and write.
+#
+# Usage: claude-nono [claude args...]
+# CLAUDE_BIN selects the Claude Code binary (default: `claude` from PATH). It must be
+# the plain binary, not another sandbox wrapper. This script is named claude-nono
+# so that it never shadows that binary on PATH.
+set -euo pipefail
+
+here=$(dirname "$(realpath "$0")")
+workdir=$(pwd -P)
+
+# The profile blocks the shared /tmp. Claude Code and the tools it runs get a
+# private TMPDIR instead, including permission to create unix sockets there.
+tmp=${XDG_CACHE_HOME:-$HOME/.cache}/claude-nono/tmp
+mkdir -p "$tmp"
+
+# `nono run` (not `nono wrap`) keeps a supervisor process. Only the supervisor
+# can enforce the profile's unix socket rules and open login URLs in your browser.
+exec nono run \
+  --profile "$here/claude-code.profile.json" \
+  --name "claude-$(basename "$workdir")" \
+  --allow "$workdir" \
+  --allow-unix-socket-subtree-bind "$tmp" \
+  -- env TMPDIR="$tmp" \
+  "${CLAUDE_BIN:-claude}" "$@"
