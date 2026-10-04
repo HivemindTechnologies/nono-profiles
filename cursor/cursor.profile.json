@@ -1,32 +1,44 @@
 {
   "meta": {
     "name": "cursor",
-    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, ...) are blocked. Start via launch.sh, which adds the per-instance state dir and the Wayland socket."
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent) and /tmp are blocked. Start via launch.sh, which grants the workdir, the per-instance home and the Wayland socket."
   },
   "extends": "default",
   "groups": {
-    "include": ["nix_runtime", "git_config"]
+    "include": ["nix_runtime", "git_config"],
+    "exclude": ["system_write_linux"]
   },
   "linux": {
     "af_unix_mediation": "pathname"
   },
   "filesystem": {
     "allow": [
-      "$HOME/.cursor",
-      "$HOME/.cache/fontconfig",
+      "/dev/pts",
       "/proc"
+    ],
+    "allow_file": [
+      "/dev/null",
+      "/dev/zero",
+      "/dev/full",
+      "/dev/tty"
     ],
     "read": [
       "/etc",
-      "/sys/devices/system/cpu",
-      "$HOME/.config/gtk-3.0"
+      "/sys/devices/system/cpu"
     ]
   },
   "environment": {
     "deny_vars": [
       "DBUS_SESSION_BUS_ADDRESS",
       "DISPLAY",
-      "XDG_RUNTIME_DIR"
+      "SSH_AUTH_SOCK",
+      "SSH_ASKPASS",
+      "SUDO_ASKPASS",
+      "XDG_RUNTIME_DIR",
+      "XDG_CONFIG_HOME",
+      "XDG_CACHE_HOME",
+      "XDG_DATA_HOME",
+      "XDG_STATE_HOME"
     ],
     "set_vars": {
       "NIXOS_OZONE_WL": "1"
