@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "name": "cursor",
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, ...) are blocked. Start via launch.sh, which adds the per-instance state dir and the Wayland socket."
+  },
+  "extends": "default",
+  "groups": {
+    "include": ["nix_runtime", "git_config"]
+  },
+  "linux": {
+    "af_unix_mediation": "pathname"
+  },
+  "filesystem": {
+    "allow": [
+      "$HOME/.cursor",
+      "$HOME/.cache/fontconfig",
+      "/proc"
+    ],
+    "read": [
+      "/etc",
+      "/sys/devices/system/cpu",
+      "$HOME/.config/gtk-3.0"
+    ]
+  },
+  "environment": {
+    "deny_vars": [
+      "DBUS_SESSION_BUS_ADDRESS",
+      "DISPLAY",
+      "XDG_RUNTIME_DIR"
+    ],
+    "set_vars": {
+      "NIXOS_OZONE_WL": "1"
+    }
+  }
+}
