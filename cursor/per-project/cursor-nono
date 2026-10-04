@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One sandboxed Cursor per project directory (default: current directory).
 # Each project gets its own instance: its own login, settings and extensions.
-# Usage: cursor [dir] [cursor args...]
+# Usage: cursor-nono [dir] [cursor args...]
 set -euo pipefail
 dir=$(realpath "${1:-.}")
 shift || true

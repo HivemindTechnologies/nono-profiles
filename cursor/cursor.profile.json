@@ -22,6 +22,9 @@
       "/dev/full",
       "/dev/tty"
     ],
+    "unix_socket": [
+      "/run/nscd/socket"
+    ],
     "read": [
       "/etc",
       "/sys/devices/system/cpu"
