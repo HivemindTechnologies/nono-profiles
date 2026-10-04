@@ -1,7 +1,7 @@
 # cursor-nono
 
-Run the Cursor IDE inside a [nono](https://nono.sh) sandbox. The sandbox builds on the
-`project` dev profile and blocks host unix sockets such as D-Bus.
+Run the Cursor IDE inside a [nono](https://nono.sh) sandbox. Self-contained: the profile
+extends only nono's built-in `default` and blocks host unix sockets such as D-Bus.
 
 The two variants share one profile and one launcher:
 
@@ -14,15 +14,32 @@ Each data dir needs its own Cursor login. Your normal `~/.config/Cursor` is neve
 
 ## Files
 
-- `cursor.profile.json`: the nono profile (extends `project`).
+- `cursor.profile.json`: the nono profile (extends built-in `default`).
 - `launch.sh <workdir> <state-name>`: scrubs the environment and runs Cursor under `nono run`.
 - `broad-root/cursor`, `per-project/cursor`: thin wrappers around `launch.sh`.
 
+## Grants and Why
+
+| Grant                                   | Why                                                        |
+|-----------------------------------------|------------------------------------------------------------|
+| workdir r+w (launcher `--allow`)        | the project being edited                                   |
+| state dir r+w + socket bind (launcher)  | Cursor data, extensions, TMPDIR, single-instance socket    |
+| Wayland socket connect (launcher)       | display                                                    |
+| `~/.cursor` r+w                         | Cursor hardcodes it (MCP config, hooks, chats, CLI)        |
+| `/proc` r+w                             | Chromium's own sandbox writes `/proc/self/uid_map`         |
+| `~/.cache/fontconfig` r+w               | font cache                                                 |
+| `/etc`, `~/.config/gtk-3.0`, CPU info r | fonts, TLS certs, GTK theme, Chromium CPU detection        |
+| groups `nix_runtime`, `git_config`      | run nix-store binaries; git in the integrated terminal     |
+
+The profile strips `DBUS_SESSION_BUS_ADDRESS`, `DISPLAY` and `XDG_RUNTIME_DIR` and sets
+`NIXOS_OZONE_WL=1`.
+
 ## What the Sandbox Blocks
 
-- Files outside the granted directory, `~/.cursor` and the `project` profile grants.
+- Files outside the grants above, including your shell configs and ssh keys.
 - Pathname unix sockets (D-Bus session bus, `systemd-run --user`, portals), except
-  Wayland, ssh-agent, nix-daemon and Cursor's own sockets.
+  Wayland and Cursor's own sockets. This also blocks ssh-agent and nix-daemon, so
+  `git push` over ssh and `nix shell` fail in the integrated terminal.
 - X11: `DISPLAY` is stripped, Cursor runs as a native Wayland client.
 
 ## Known Gaps
