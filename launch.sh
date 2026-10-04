@@ -34,7 +34,7 @@ cd "$workdir"
 exec env WAYLAND_DISPLAY="$wayland" TMPDIR="$state/tmp" \
   nono run \
     --profile "$here/cursor.profile.json" \
-    --workdir "$workdir" \
+    --allow "$workdir" \
     --name "cursor-$(basename "$workdir")" \
     --allow-unix-socket-subtree-bind "$state" \
     --allow-unix-socket "$wayland" \
