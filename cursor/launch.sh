@@ -22,6 +22,9 @@ shift 2
 here=$(dirname "$(realpath "$0")")
 
 home=$instance/home
+# Cursor creates its IPC sockets in TMPDIR. The profile blocks all sockets in
+# the shared /tmp (tmux and X11 live there), so TMPDIR points into the instance
+# dir, where the sandbox may bind sockets.
 tmp=$instance/tmp
 mkdir -p "$home/.config" "$tmp"
 # git in the integrated terminal needs your name and email. The profile grants

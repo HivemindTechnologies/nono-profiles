@@ -27,7 +27,8 @@ So each instance needs its own login, and your normal `~/.config/Cursor` and
 | Access                  | Paths                                                         |
 |-------------------------|---------------------------------------------------------------|
 | read + write            | the project dir                                               |
-| read + write            | the instance dir (Cursor data, temp files, its own sockets)   |
+| read + write            | the instance dir (Cursor data, `TMPDIR`, its own sockets)     |
+| read + write            | `/tmp` (sockets there stay blocked)                           |
 | read + write            | `/proc` (Chromium's own sandbox needs it)                     |
 | read                    | `/etc`, `/nix/store` and nix profiles, your git config, CPU info |
 | connect                 | `/run/nscd/socket` (user and host name lookups)               |
@@ -35,9 +36,12 @@ So each instance needs its own login, and your normal `~/.config/Cursor` and
 | network                 | everything                                                    |
 
 Everything else is blocked, including `~/.ssh`, shell configs, other projects,
-`/tmp`, D-Bus, the nix daemon, the ssh-agent and X11.
+D-Bus, the nix daemon, the ssh-agent and X11.
 
-## Risks We Accept
+`TMPDIR` points into the instance dir because Cursor creates its IPC sockets
+there, and the sandbox may not create sockets in `/tmp`.
+
+## Shortcuts We Take
 
 - **Wayland.** Sway lets every window use the virtual keyboard and read the
   clipboard. Sandboxed code could type into your other windows, for example a
@@ -46,7 +50,8 @@ Everything else is blocked, including `~/.ssh`, shell configs, other projects,
 - **All of `/etc` is readable.** It is mostly links into `/nix/store`, and
   secret files there are readable by root only. Narrowing it risks breaking
   the GUI for little gain.
-- **Open network.** See the top-level README.
+- **Open network, environment variables and `/tmp`.** See the top-level
+  README.
 
 ## What Does Not Work
 
@@ -62,7 +67,7 @@ Everything else is blocked, including `~/.ssh`, shell configs, other projects,
    the window opens.
 2. Log in. If no browser opens, copy the login URL by hand.
 3. In the integrated terminal, each of these must fail:
-   `ls ~/.ssh`, `ls ~/workbench`, `busctl --user list`, `touch /tmp/x`.
+   `ls ~/.ssh`, `ls ~/workbench`, `busctl --user list`.
 4. `git -C /tmp/cursor-test init` must work.
 5. Let the agent run a command in chat. This tests Cursor's own terminal sandbox.
 6. If the window does not open, append `--no-sandbox`. That turns off only

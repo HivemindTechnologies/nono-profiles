@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "cursor",
-    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent) and /tmp are blocked. The project dir is the current directory ($WORKDIR). Start via launch.sh, which cds into the project dir and grants the per-instance home and the Wayland socket."
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR). Start via launch.sh, which cds into the project dir and grants the per-instance home and the Wayland socket."
   },
   "extends": "default",
   "groups": {
@@ -14,6 +14,7 @@
   "filesystem": {
     "allow": [
       "$WORKDIR",
+      "/tmp",
       "/dev/pts",
       "/proc"
     ],
