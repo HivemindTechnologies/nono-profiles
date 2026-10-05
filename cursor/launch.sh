@@ -33,13 +33,14 @@ ln -sfn "$HOME/.config/git" "$home/.config/git"
 wayland=${WAYLAND_DISPLAY:?WAYLAND_DISPLAY is not set; this launcher supports Wayland only}
 [[ $wayland == /* ]] || wayland=${XDG_RUNTIME_DIR:?}/$wayland
 
+# The profile grants $WORKDIR, which nono takes from the current directory.
+# The instance dir and the Wayland socket differ per instance and per session,
+# so they cannot live in the profile and are granted here.
 # HOME and TMPDIR are set inside the sandbox (via env) because nono itself must
 # still see the real HOME to resolve the profile's $HOME paths.
 cd "$workdir"
 exec nono run \
   --profile "$here/cursor.profile.json" \
-  --name "cursor-$(basename "$workdir")" \
-  --allow "$workdir" \
   --allow-unix-socket-subtree-bind "$instance" \
   --allow-unix-socket "$wayland" \
   -- env HOME="$home" TMPDIR="$tmp" WAYLAND_DISPLAY="$wayland" \
