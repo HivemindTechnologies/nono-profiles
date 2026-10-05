@@ -30,6 +30,7 @@ So each instance needs its own login, and your normal `~/.config/Cursor` and
 | read + write            | the instance dir (Cursor data, temp files, its own sockets)   |
 | read + write            | `/proc` (Chromium's own sandbox needs it)                     |
 | read                    | `/etc`, `/nix/store` and nix profiles, your git config, CPU info |
+| connect                 | `/run/nscd/socket` (user and host name lookups)               |
 | connect                 | the Wayland display                                           |
 | network                 | everything                                                    |
 
@@ -57,7 +58,8 @@ Everything else is blocked, including `~/.ssh`, shell configs, other projects,
 
 ## Test It
 
-1. `cursor/per-project/cursor-nono /tmp/cursor-test`: the window opens.
+1. `mkdir -p /tmp/cursor-test && cursor/per-project/cursor-nono /tmp/cursor-test`:
+   the window opens.
 2. Log in. If no browser opens, copy the login URL by hand.
 3. In the integrated terminal, each of these must fail:
    `ls ~/.ssh`, `ls ~/workbench`, `busctl --user list`, `touch /tmp/x`.

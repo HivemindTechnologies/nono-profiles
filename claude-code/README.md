@@ -5,6 +5,9 @@ cd ~/workbench/my-project
 nix develop -c ~/workbench/cursor-nono/claude-code/claude-nono --dangerously-skip-permissions
 ```
 
+`claude-nono` runs `claude` from your PATH. If that `claude` is itself a
+sandbox wrapper, set `CLAUDE_BIN` to the plain Claude Code binary.
+
 ## What Claude Can Access
 
 | Access                         | Paths                                                        |
@@ -13,7 +16,8 @@ nix develop -c ~/workbench/cursor-nono/claude-code/claude-nono --dangerously-ski
 | read + write                   | `~/.claude`, `~/.claude.json`, Claude's cache and lock dirs  |
 | read + write (build caches)    | `~/.cargo`, `~/.rustup`, `~/.sbt`, `~/.ivy2`, `~/.cache/coursier`, `~/.npm`, `~/.local/share/pnpm`, `~/.cache/pip`, `~/.cache/uv` |
 | read + write (temp)            | `~/.cache/claude-nono/tmp` (set as `TMPDIR`)                 |
-| read                           | `/nix/store` and nix profiles, your git config, `/etc/passwd`, `/etc/group` |
+| read                           | `/nix/store` and nix profiles, your git config, `/etc/passwd`, `/etc/group`, `/etc/machine-id` |
+| connect                        | `/run/nscd/socket` (user and host name lookups)              |
 | network                        | everything                                                   |
 | opens in your browser          | login pages on claude.ai, claude.com, platform.claude.com, console.anthropic.com |
 
@@ -22,12 +26,22 @@ Everything else is blocked, including `~/.ssh`, shell configs, other projects,
 
 ## Risks We Accept
 
-- **Build caches are shared with your host.** A malicious dependency that
-  Claude downloads lands in, say, `~/.cargo/registry`. Your next build outside
-  the sandbox runs it. We accept this so that dependencies download once.
-- **`~/.claude` is shared by all projects.** One session can add hooks or
-  skills that later sessions run (still sandboxed), and it can read the
-  transcripts of other projects.
+The first two risks let sandboxed code run code outside the sandbox.
+
+- **Build caches are shared with your host.** The sandbox can write
+  everything in them, including programs your host runs. `~/.cargo/bin`
+  holds `cargo` and `rustc` and is usually on your PATH: if the sandbox
+  replaces them, your next `cargo` outside the sandbox runs its code. The
+  same holds for pnpm's global bin dir (`~/.local/share/pnpm`), sbt's global
+  plugins (`~/.sbt`) and any poisoned package in the caches. We accept this
+  so that toolchains and dependencies download once.
+- **`~/.claude` and `~/.claude.json` are shared with your host.** The
+  sandbox can add hooks (`~/.claude/settings.json`) and MCP servers
+  (`~/.claude.json`). **Never run plain `claude` outside the sandbox**: it
+  would run them unsandboxed. All projects also share this config, so one
+  session can read the transcripts of other projects.
+- **The temp dir is shared by all projects.** Every session uses
+  `~/.cache/claude-nono/tmp`.
 - **Open network.** See the top-level README.
 
 ## What Does Not Work

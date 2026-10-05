@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "claude-code",
-    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland) and /tmp are blocked. Start via the `claude` launcher, which grants the workdir and a private TMPDIR."
+    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland) and /tmp are blocked. Start via the `claude-nono` launcher, which grants the workdir and a private TMPDIR."
   },
   "extends": "default",
   "groups": {
