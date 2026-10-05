@@ -5,8 +5,11 @@ cd ~/workbench/my-project
 nix develop -c ~/workbench/cursor-nono/claude-code/claude-nono --dangerously-skip-permissions
 ```
 
-`claude-nono` runs `claude` from your PATH. If that `claude` is itself a
-sandbox wrapper, set `CLAUDE_BIN` to the plain Claude Code binary.
+`claude-code.profile.json` defines the whole sandbox. `claude-nono` only
+creates the temp dir and runs
+`nono run --profile claude-code.profile.json -- claude`.
+It uses `claude` from your PATH; if that `claude` is itself a sandbox wrapper,
+set `CLAUDE_BIN` to the plain Claude Code binary.
 
 ## What Claude Can Access
 

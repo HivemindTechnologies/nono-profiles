@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "claude-code",
-    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland) and /tmp are blocked. Start via the `claude-nono` launcher, which grants the workdir and a private TMPDIR."
+    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland) and /tmp are blocked. The project dir is the current directory ($WORKDIR). Start via `claude-nono`, which creates the private TMPDIR first."
   },
   "extends": "default",
   "groups": {
@@ -13,6 +13,8 @@
   },
   "filesystem": {
     "allow": [
+      "$WORKDIR",
+
       "$HOME/.claude",
       "$HOME/.cache/claude",
       "$HOME/.cache/claude-cli-nodejs",
@@ -42,6 +44,9 @@
     "unix_socket": [
       "/run/nscd/socket"
     ],
+    "unix_socket_subtree_bind": [
+      "$XDG_CACHE_HOME/claude-nono/tmp"
+    ],
     "read_file": [
       "/etc/passwd",
       "/etc/group",
@@ -57,7 +62,10 @@
       "SSH_ASKPASS",
       "SUDO_ASKPASS",
       "XDG_RUNTIME_DIR"
-    ]
+    ],
+    "set_vars": {
+      "TMPDIR": "$XDG_CACHE_HOME/claude-nono/tmp"
+    }
   },
   "open_urls": {
     "allow_origins": [
