@@ -22,7 +22,7 @@
             --call='org.freedesktop.portal.Desktop=org.freedesktop.DBus.Introspectable.Introspect@/org/freedesktop/portal/desktop' &
           trap 'kill $!' EXIT
           until [[ -S $bus ]]; do sleep 0.05; done
-          nono run --profile ${./cursor/cursor.profile.json} -- cursor "$@"
+          nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} -- cursor "$@"
         '';
       };
     in {
