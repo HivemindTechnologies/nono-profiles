@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "claude-code",
+    "name": "claude",
     "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR). Start with `nono run --profile <this file> -- claude`."
   },
   "extends": "default",

@@ -28,7 +28,7 @@
       claude-nono = pkgs.writeShellApplication {
         name = "claude-nono";
         text = ''
-          nono run --no-diagnostics --profile ${./claude-code/claude-code.profile.json} -- claude "$@"
+          nono run --no-diagnostics --profile ${./claude/claude.profile.json} -- claude "$@"
         '';
       };
     in {
