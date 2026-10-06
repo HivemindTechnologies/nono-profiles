@@ -2,8 +2,7 @@
 
 ```sh
 cd ~/workbench/my-project
-nono run --profile ~/workbench/cursor-nono/claude-code/claude-code.profile.json \
-  -- claude --dangerously-skip-permissions
+claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cursor-nono`
 ```
 
 `claude` must be the plain binary, not another sandbox wrapper.

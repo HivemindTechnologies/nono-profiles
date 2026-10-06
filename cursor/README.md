@@ -3,7 +3,7 @@
 ```sh
 cd ~/workbench/my-project   # per project: sees only my-project
 cd ~/workbench              # broad: sees all projects
-nix run ~/workbench/cursor-nono
+cursor-nono   # from `nix develop ~/workbench/cursor-nono`
 ```
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
@@ -71,7 +71,7 @@ system-bus attempts at startup.
 
 ## Test It
 
-1. In a fresh `/tmp/cursor-test`, run `nix run ~/workbench/cursor-nono`:
+1. In a fresh `/tmp/cursor-test`, run `cursor-nono`:
    the window opens. "Log In" opens your browser.
 2. In the terminal, these must fail: `ls /home/$USER/.ssh`,
    `ls /home/$USER/workbench`, `busctl --user list`.

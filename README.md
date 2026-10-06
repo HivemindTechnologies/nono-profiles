@@ -6,9 +6,13 @@ write or run cannot touch the rest of your machine.
 Start from the project dir. The sandbox can write only that dir.
 
 ```sh
-nix run ~/workbench/cursor-nono   # Cursor
-nono run --profile ~/workbench/cursor-nono/claude-code/claude-code.profile.json -- claude
+nix develop ~/workbench/cursor-nono   # provides cursor-nono and claude-nono
+cd ~/workbench/my-project
+cursor-nono
+claude-nono --dangerously-skip-permissions
 ```
+
+Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`.
 
 Each profile is self-contained: it extends only nono's built-in `default`.
 Cursor needs a small launcher (`flake.nix`) so that it can open links.

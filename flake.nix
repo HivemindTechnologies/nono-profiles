@@ -25,7 +25,14 @@
           nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} -- cursor "$@"
         '';
       };
+      claude-nono = pkgs.writeShellApplication {
+        name = "claude-nono";
+        text = ''
+          nono run --no-diagnostics --profile ${./claude-code/claude-code.profile.json} -- claude "$@"
+        '';
+      };
     in {
-      packages.x86_64-linux.default = cursor-nono;
+      packages.x86_64-linux = { inherit cursor-nono claude-nono; default = cursor-nono; };
+      devShells.x86_64-linux.default = pkgs.mkShell { packages = [ cursor-nono claude-nono ]; };
     };
 }
