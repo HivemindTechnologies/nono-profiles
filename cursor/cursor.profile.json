@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "cursor",
-    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR); Cursor's HOME and TMPDIR live in $WORKDIR/.cursor-nono. Start with `nono run --profile <this file> -- cursor` from the project dir. See README.md for why each grant exists."
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, tmux) are blocked. The project dir is the current directory ($WORKDIR); Cursor's HOME, data dir and TMPDIR live in $WORKDIR/.cursor-nono. Start via the flake's cursor-nono. See README.md for why each grant exists."
   },
   "extends": "default",
   "groups": {
@@ -14,26 +14,15 @@
   "filesystem": {
     "allow": [
       "$WORKDIR",
-      "/tmp",
-      "/dev/pts",
-      "/proc"
+      "/tmp"
     ],
     "allow_file": [
       "/dev/null",
       "/dev/zero",
-      "/dev/full",
       "/dev/tty"
-    ],
-    "unix_socket": [
-      "/run/nscd/socket",
-      "$XDG_RUNTIME_DIR/wayland-1"
     ],
     "unix_socket_subtree_bind": [
       "$WORKDIR"
-    ],
-    "read": [
-      "/etc",
-      "/sys/devices/system/cpu"
     ]
   },
   "environment": {
@@ -51,11 +40,6 @@
     "set_vars": {
       "HOME": "$WORKDIR/.cursor-nono/home",
       "TMPDIR": "$WORKDIR/.cursor-nono",
-      "WAYLAND_DISPLAY": "$XDG_RUNTIME_DIR/wayland-1",
-      "NIXOS_OZONE_WL": "1",
-      "DBUS_SYSTEM_BUS_ADDRESS": "disabled:",
-      "DBUS_SESSION_BUS_ADDRESS": "unix:path=$WORKDIR/.cursor-nono/bus",
-      "NIXOS_XDG_OPEN_USE_PORTAL": "1",
       "GIT_CONFIG_GLOBAL": "$HOME/.config/git/config",
       "GIT_CONFIG_COUNT": "1",
       "GIT_CONFIG_KEY_0": "core.excludesFile",
@@ -64,10 +48,54 @@
   },
   "command_args": [
     "--verbose",
-    "--ozone-platform=wayland",
     "--disable-gpu",
-    "--disable-dev-shm-usage",
-    "--password-store=basic",
+    "--user-data-dir=$WORKDIR/.cursor-nono/data",
     "$WORKDIR"
-  ]
+  ],
+  "platform_overrides": {
+    "linux": {
+      "filesystem": {
+        "allow": [
+          "/dev/pts",
+          "/proc"
+        ],
+        "allow_file": [
+          "/dev/full"
+        ],
+        "unix_socket": [
+          "/run/nscd/socket",
+          "$XDG_RUNTIME_DIR/wayland-1"
+        ],
+        "read": [
+          "/etc",
+          "/sys/devices/system/cpu"
+        ]
+      },
+      "environment": {
+        "set_vars": {
+          "WAYLAND_DISPLAY": "$XDG_RUNTIME_DIR/wayland-1",
+          "NIXOS_OZONE_WL": "1",
+          "DBUS_SYSTEM_BUS_ADDRESS": "disabled:",
+          "DBUS_SESSION_BUS_ADDRESS": "unix:path=$WORKDIR/.cursor-nono/bus",
+          "NIXOS_XDG_OPEN_USE_PORTAL": "1"
+        }
+      },
+      "command_args": [
+        "--ozone-platform=wayland",
+        "--disable-dev-shm-usage",
+        "--password-store=basic"
+      ]
+    },
+    "macos": {
+      "unsafe_macos_seatbelt_rules": [
+        "(deny network-outbound (regex \"^/\"))",
+        "(allow network-outbound (path \"/private/var/run/mDNSResponder\"))",
+        "(allow network-outbound (path \"/var/run/mDNSResponder\"))",
+        "(allow network-outbound (regex \"/[.]cursor-nono/\"))"
+      ],
+      "command_args": [
+        "--no-sandbox"
+      ]
+    }
+  }
 }

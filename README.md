@@ -13,7 +13,12 @@ claude-nono --dangerously-skip-permissions
 ```
 
 Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`.
-The flake pins Cursor and Claude Code (`flake.lock`); `nix flake update` updates them.
+The flake pins nono, Cursor and Claude Code (`flake.lock`); `nix flake update`
+updates them.
+
+Linux is tested. macOS (Apple Silicon) is **experimental**: each profile has
+a `platform_overrides.macos` section, but nobody has run it yet. See
+`TESTING-MACOS.md`.
 
 Each profile is self-contained: it extends only nono's built-in `default`.
 Cursor needs a small launcher (`flake.nix`) so that it can open links.

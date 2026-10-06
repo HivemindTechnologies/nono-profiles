@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "claude",
-    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR). Start with `nono run --profile <this file> -- claude`."
+    "description": "Claude Code CLI. Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, Wayland, tmux) are blocked. The project dir is the current directory ($WORKDIR). Start via the flake's claude-nono."
   },
   "extends": "default",
   "groups": {
@@ -17,21 +17,13 @@
       "/tmp",
 
       "$HOME/.claude",
-      "$HOME/.cache/claude",
-      "$HOME/.cache/claude-cli-nodejs",
-      "$HOME/.local/state/claude",
 
       "$HOME/.cargo",
       "$HOME/.rustup",
       "$HOME/.sbt",
       "$HOME/.ivy2",
-      "$HOME/.cache/coursier",
       "$HOME/.npm",
-      "$HOME/.local/share/pnpm",
-      "$HOME/.cache/pip",
-      "$HOME/.cache/uv",
-
-      "/dev/pts"
+      "$HOME/.cache/uv"
     ],
     "allow_file": [
       "$HOME/.claude.json",
@@ -39,16 +31,11 @@
       "$HOME/.claude.lock",
       "/dev/null",
       "/dev/zero",
-      "/dev/full",
       "/dev/tty"
-    ],
-    "unix_socket": [
-      "/run/nscd/socket"
     ],
     "read_file": [
       "/etc/passwd",
-      "/etc/group",
-      "/etc/machine-id"
+      "/etc/group"
     ]
   },
   "environment": {
@@ -70,5 +57,44 @@
       "https://console.anthropic.com"
     ],
     "allow_localhost": true
+  },
+  "platform_overrides": {
+    "linux": {
+      "filesystem": {
+        "allow": [
+          "$HOME/.cache/claude",
+          "$HOME/.cache/claude-cli-nodejs",
+          "$HOME/.local/state/claude",
+          "$HOME/.cache/coursier",
+          "$HOME/.local/share/pnpm",
+          "$HOME/.cache/pip",
+          "/dev/pts"
+        ],
+        "allow_file": [
+          "/dev/full"
+        ],
+        "unix_socket": [
+          "/run/nscd/socket"
+        ],
+        "read_file": [
+          "/etc/machine-id"
+        ]
+      }
+    },
+    "macos": {
+      "filesystem": {
+        "allow": [
+          "$HOME/Library/Caches/claude-cli-nodejs",
+          "$HOME/Library/Caches/Coursier",
+          "$HOME/Library/pnpm",
+          "$HOME/Library/Caches/pip"
+        ]
+      },
+      "unsafe_macos_seatbelt_rules": [
+        "(deny network-outbound (regex \"^/\"))",
+        "(allow network-outbound (path \"/private/var/run/mDNSResponder\"))",
+        "(allow network-outbound (path \"/var/run/mDNSResponder\"))"
+      ]
+    }
   }
 }

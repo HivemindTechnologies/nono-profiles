@@ -7,17 +7,20 @@ claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cur
 
 `claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude` on your PATH.
 
+Linux is tested. macOS is **experimental**: untested so far, see
+`../TESTING-MACOS.md`.
+
 ## Access
 
 | Access          | Paths                                                          |
 |-----------------|----------------------------------------------------------------|
 | read + write    | the project dir, `/tmp` (no sockets)                           |
 | read + write    | `~/.claude`, `~/.claude.json`, Claude's cache and state dirs   |
-| read + write    | build caches: `~/.cargo`, `~/.rustup`, `~/.sbt`, `~/.ivy2`, `~/.cache/coursier`, `~/.npm`, `~/.local/share/pnpm`, `~/.cache/pip`, `~/.cache/uv` |
-| read            | `/nix/store`, your git config, `/etc/passwd`, `/etc/group`, `/etc/machine-id` |
-| connect         | `/run/nscd/socket` (user lookups)                              |
+| read + write    | build caches: `~/.cargo`, `~/.rustup`, `~/.sbt`, `~/.ivy2`, `~/.npm`, `~/.cache/uv`; Linux: `~/.cache/coursier`, `~/.local/share/pnpm`, `~/.cache/pip`; macOS: `~/Library/Caches/Coursier`, `~/Library/pnpm`, `~/Library/Caches/pip` |
+| read            | `/nix/store`, your git config, `/etc/passwd`, `/etc/group`     |
+| unix sockets    | Linux: `/run/nscd/socket`; macOS: DNS (mDNSResponder)          |
 | network         | everything                                                     |
-| open in browser | login pages of claude.ai and Anthropic                         |
+| open in browser | login pages of claude.ai and Anthropic (Linux)                 |
 
 ## Shortcuts: the Sandbox Can Escape
 
@@ -33,6 +36,10 @@ claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cur
 - nix commands, `git push` over ssh, pasting images.
 - A cache dir that does not exist yet: create it once on the host
   (`mkdir ~/.cache/uv`).
+- macOS: Claude Code keeps its login in the keychain, which nono blocks.
+  If the login does not stick, create a token outside the sandbox with
+  `claude setup-token` and export it as `CLAUDE_CODE_OAUTH_TOKEN`. If the
+  login page does not open, copy the URL Claude prints.
 
 ## Test It
 
