@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "cursor",
-    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR). Start via launch.sh, which cds into the project dir and grants the per-instance home and the Wayland socket."
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, and all sockets in /tmp) are blocked. The project dir is the current directory ($WORKDIR); Cursor's HOME and TMPDIR live in $WORKDIR/.cursor-nono. Start with `nono run --profile <this file> -- cursor` from the project dir. See README.md for why each grant exists."
   },
   "extends": "default",
   "groups": {
@@ -25,7 +25,11 @@
       "/dev/tty"
     ],
     "unix_socket": [
-      "/run/nscd/socket"
+      "/run/nscd/socket",
+      "$XDG_RUNTIME_DIR/wayland-1"
+    ],
+    "unix_socket_subtree_bind": [
+      "$WORKDIR"
     ],
     "read": [
       "/etc",
@@ -46,7 +50,21 @@
       "XDG_STATE_HOME"
     ],
     "set_vars": {
-      "NIXOS_OZONE_WL": "1"
+      "HOME": "$WORKDIR/.cursor-nono/home",
+      "TMPDIR": "$WORKDIR/.cursor-nono/tmp",
+      "WAYLAND_DISPLAY": "$XDG_RUNTIME_DIR/wayland-1",
+      "NIXOS_OZONE_WL": "1",
+      "GIT_CONFIG_GLOBAL": "$HOME/.config/git/config",
+      "GIT_CONFIG_COUNT": "1",
+      "GIT_CONFIG_KEY_0": "core.excludesFile",
+      "GIT_CONFIG_VALUE_0": "$HOME/.config/git/ignore"
     }
-  }
+  },
+  "command_args": [
+    "--ozone-platform=wayland",
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+    "--password-store=basic",
+    "$WORKDIR"
+  ]
 }

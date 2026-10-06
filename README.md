@@ -3,13 +3,14 @@
 Run AI coding tools inside a [nono](https://nono.sh) sandbox, so that code they
 write or run cannot touch the rest of your machine.
 
-| Folder         | Tool                     | Start with                                      |
-|----------------|--------------------------|-------------------------------------------------|
-| `cursor/`      | Cursor IDE (GUI)         | `cursor/per-project/cursor-nono [dir]`          |
-| `claude-code/` | Claude Code (terminal)   | `nono run --profile claude-code/claude-code.profile.json -- claude` in the project dir |
+| Folder         | Tool                     | Start in the project dir with                                   |
+|----------------|--------------------------|-----------------------------------------------------------------|
+| `cursor/`      | Cursor IDE (GUI)         | `nono run --profile cursor/cursor.profile.json -- cursor`       |
+| `claude-code/` | Claude Code (terminal)   | `nono run --profile claude-code/claude-code.profile.json -- claude` |
 
 Each folder is self-contained: its profile extends only nono's built-in
-`default` profile and needs nothing from `~/.config/nono`.
+`default` profile, needs nothing from `~/.config/nono`, and needs no launcher
+script.
 
 ## Secure, but Pragmatic
 

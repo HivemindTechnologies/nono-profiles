@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# One sandboxed Cursor for all projects under ~/workbench.
-# Projects can see each other; login and settings are shared between them.
-set -euo pipefail
-exec "$(dirname "$(realpath "$0")")/../launch.sh" "$HOME/workbench" broad-root "$@"
