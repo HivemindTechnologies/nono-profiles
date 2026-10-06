@@ -28,13 +28,17 @@
         nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} -- cursor "$@"
       '';
 
-      cursorDarwin = ''
+      cursorDarwin = pkgs: ''
         # macOS has no narrow way to open links: --login lets the sandbox use
         # LaunchServices, which can also start any app outside the sandbox.
         # Use it only to log in.
         extra=()
         if [[ ''${1-} == --login ]]; then shift; extra=(--allow-launch-services); fi
-        nono run --no-diagnostics "''${extra[@]}" --profile ${./cursor/cursor.profile.json} -- cursor "$@"
+        # We run the app binary itself: bin/cursor would start Cursor through
+        # `open` (LaunchServices), which nono blocks, or which, with --login,
+        # starts Cursor outside the sandbox.
+        nono run --no-diagnostics "''${extra[@]}" --profile ${./cursor/cursor.profile.json} \
+          -- ${pkgs.code-cursor}/Applications/Cursor.app/Contents/MacOS/Cursor "$@"
       '';
 
       packagesFor = pkgs: rec {
@@ -42,7 +46,7 @@
           name = "cursor-nono";
           runtimeInputs = [ pkgs.nono pkgs.code-cursor ]
             ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.xdg-dbus-proxy;
-          text = if pkgs.stdenv.hostPlatform.isLinux then cursorLinux pkgs else cursorDarwin;
+          text = if pkgs.stdenv.hostPlatform.isLinux then cursorLinux pkgs else cursorDarwin pkgs;
         };
         claude-nono = pkgs.writeShellApplication {
           name = "claude-nono";

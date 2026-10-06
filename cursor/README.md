@@ -50,6 +50,11 @@ Cursor exits (and prints its log). Without it, `cursor` exits at once;
 nono exits too, and with it the supervisor that approves socket calls:
 Cursor then shows a white window and dies.
 
+On macOS the launcher skips `cursor` and runs
+`Cursor.app/Contents/MacOS/Cursor` directly: `cursor` starts the app through
+`open` (LaunchServices), which nono blocks (error -54) or, with `--login`,
+which starts Cursor outside the sandbox.
+
 ## Rate Limit on Sockets (Linux)
 
 nono allows at most 5 socket `connect`/`bind` calls at once, refilled at
