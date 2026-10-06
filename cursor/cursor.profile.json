@@ -38,7 +38,6 @@
   },
   "environment": {
     "deny_vars": [
-      "DBUS_SESSION_BUS_ADDRESS",
       "DISPLAY",
       "SSH_AUTH_SOCK",
       "SSH_ASKPASS",
@@ -51,9 +50,12 @@
     ],
     "set_vars": {
       "HOME": "$WORKDIR/.cursor-nono/home",
-      "TMPDIR": "$WORKDIR/.cursor-nono/tmp",
+      "TMPDIR": "$WORKDIR/.cursor-nono",
       "WAYLAND_DISPLAY": "$XDG_RUNTIME_DIR/wayland-1",
       "NIXOS_OZONE_WL": "1",
+      "DBUS_SYSTEM_BUS_ADDRESS": "disabled:",
+      "DBUS_SESSION_BUS_ADDRESS": "unix:path=$WORKDIR/.cursor-nono/bus",
+      "NIXOS_XDG_OPEN_USE_PORTAL": "1",
       "GIT_CONFIG_GLOBAL": "$HOME/.config/git/config",
       "GIT_CONFIG_COUNT": "1",
       "GIT_CONFIG_KEY_0": "core.excludesFile",
@@ -61,6 +63,7 @@
     }
   },
   "command_args": [
+    "--wait",
     "--ozone-platform=wayland",
     "--disable-gpu",
     "--disable-dev-shm-usage",

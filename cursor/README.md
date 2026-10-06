@@ -3,20 +3,42 @@
 ```sh
 cd ~/workbench/my-project   # per project: sees only my-project
 cd ~/workbench              # broad: sees all projects
-nono run --profile ~/workbench/cursor-nono/cursor/cursor.profile.json -- cursor
+nix run ~/workbench/cursor-nono
 ```
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
 
 ## Own Home per Project
 
-Inside the sandbox, `HOME` is `<project>/.cursor-nono/home`. Cursor keeps
-login, settings, extensions, chats, `mcp.json` and hooks there. Your real
-`~/.cursor` stays untouched, so the sandbox cannot plant hooks that an
-unsandboxed Cursor would run. Each project needs its own login.
+Inside the sandbox, `HOME` is `<project>/.cursor-nono/home` and `TMPDIR` is
+`<project>/.cursor-nono`. Cursor keeps login, settings, extensions, chats,
+`mcp.json` and hooks there. Your real `~/.cursor` stays untouched, so the
+sandbox cannot plant hooks that an unsandboxed Cursor would run. Each
+project needs its own login.
 
-The home lives in the project because nono grants only paths that exist,
-and a profile cannot create them.
+## Opening Links
+
+The launcher (`flake.nix`) runs `xdg-dbus-proxy` next to the sandbox, at
+`.cursor-nono/bus`. It passes on only one D-Bus call: the desktop portal's
+`OpenURI`, which opens a link in your default browser. Everything else on
+D-Bus stays blocked. Inside, `xdg-open` uses the portal
+(`NIXOS_XDG_OPEN_USE_PORTAL=1`).
+
+nono's own `open_urls` does not work here: nono 0.68 deadlocks when its
+link helper runs under `af_unix_mediation`.
+
+## Why `--wait`
+
+The profile passes `--wait`, so `cursor` stays in the foreground until its
+window closes. Without it, `cursor` exits at once, and with it nono's
+supervisor (which approves socket calls) and the D-Bus proxy.
+
+## Rate Limit on Sockets
+
+nono allows at most 5 socket `connect`/`bind` calls at once, refilled at
+10 per second; further calls fail with "operation not permitted". The
+profile sets `DBUS_SYSTEM_BUS_ADDRESS=disabled:`, so Chromium skips 5
+system-bus attempts at startup.
 
 ## Access
 
@@ -26,6 +48,7 @@ and a profile cannot create them.
 | read            | `/etc`, `/nix/store`, your git config, CPU info        |
 | create sockets  | in the project dir                                     |
 | connect         | Wayland display, `/run/nscd/socket` (user lookups)     |
+| D-Bus           | only the portal's `OpenURI`                            |
 | network         | everything                                             |
 
 ## Shortcuts
@@ -33,6 +56,7 @@ and a profile cannot create them.
 - **Wayland**: sandboxed code can type into your other windows and read the
   clipboard. The display is fixed to `wayland-1`; change it in the profile
   if yours differs.
+- **Links**: sandboxed code can open any link in your browser.
 - **Login in the project dir**: other sandboxes on the project (Claude Code)
   can read it.
 
@@ -45,9 +69,11 @@ and a profile cannot create them.
 
 ## Test It
 
-1. In `/tmp/cursor-test`, start Cursor: the window opens and `.cursor-nono/`
-   appears. If not, run `mkdir -p .cursor-nono/{home,tmp}` and retry, then
-   try `cursor --no-sandbox` (turns off only Chromium's own sandbox).
+1. In a fresh `/tmp/cursor-test`, run `nix run ~/workbench/cursor-nono`:
+   the window opens. "Log In" opens your browser.
 2. In the terminal, these must fail: `ls /home/$USER/.ssh`,
    `ls /home/$USER/workbench`, `busctl --user list`.
 3. `git config user.name` prints your name.
+
+For a shell in the sandbox, use `nono run --profile cursor/cursor.profile.json
+-- sh -c sh` (`sh -c` ignores the Cursor flags the profile appends).
