@@ -5,7 +5,7 @@ cd ~/workbench/my-project
 claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cursor-nono`
 ```
 
-`claude` must be the plain binary, not another sandbox wrapper.
+`claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude` on your PATH.
 
 ## Access
 
