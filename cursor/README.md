@@ -27,11 +27,13 @@ D-Bus stays blocked. Inside, `xdg-open` uses the portal
 nono's own `open_urls` does not work here: nono 0.68 deadlocks when its
 link helper runs under `af_unix_mediation`.
 
-## Why `--wait`
+## Why `--verbose`
 
-The profile passes `--wait`, so `cursor` stays in the foreground until its
-window closes. Without it, `cursor` exits at once, and with it nono's
-supervisor (which approves socket calls) and the D-Bus proxy.
+The profile passes `--verbose`, so `cursor` stays in the foreground until
+Cursor exits (and prints its log). Without it, `cursor` exits at once;
+`--wait` returns when the first window closes, e.g. after login. Either way
+nono exits too, and with it the supervisor that approves socket calls:
+Cursor then shows a white window and dies.
 
 ## Rate Limit on Sockets
 

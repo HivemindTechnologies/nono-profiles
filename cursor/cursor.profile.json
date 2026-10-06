@@ -63,7 +63,7 @@
     }
   },
   "command_args": [
-    "--wait",
+    "--verbose",
     "--ozone-platform=wayland",
     "--disable-gpu",
     "--disable-dev-shm-usage",
