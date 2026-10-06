@@ -3,25 +3,22 @@
 
   inputs.nixpkgs.url = "nixpkgs";
 
-  outputs = {
-    self,
-    nixpkgs,
-  }: let
-    # Cursor and Claude Code are unfree.
-    pkgs = import nixpkgs {
-      system = "x86_64-linux";
-      config.allowUnfree = true;
-    };
-    # nono 0.68 cannot open links from a sandbox that filters unix sockets,
-    # so we expose a D-Bus proxy that allows only the portal's OpenURI call.
-    # gdbus (used by xdg-open) also needs Introspect to learn the argument types.
-    # The socket lives in the project dir, where the profile allows sockets.
-    cursor-nono = pkgs.writeShellApplication {
-      name = "cursor-nono";
-      runtimeInputs = [pkgs.code-cursor pkgs.xdg-dbus-proxy];
-      text = ''
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f (import nixpkgs {
+        inherit system;
+        # Cursor and Claude Code are unfree.
+        config.allowUnfree = true;
+      }));
+
+      cursorLinux = pkgs: ''
+        # nono cannot open links from a sandbox that filters unix sockets,
+        # so we expose a D-Bus proxy that allows only the portal's OpenURI call.
+        # gdbus (used by xdg-open) also needs Introspect to learn the argument types.
+        # The socket lives in the project dir, where the profile allows sockets.
         bus=$PWD/.cursor-nono/bus
-        mkdir -p "$PWD/.cursor-nono/home"
+        mkdir -p "$PWD/.cursor-nono"
         rm -f "$bus"
         xdg-dbus-proxy "''${DBUS_SESSION_BUS_ADDRESS:?}" "$bus" --filter \
           --call='org.freedesktop.portal.Desktop=org.freedesktop.portal.OpenURI.OpenURI@/org/freedesktop/portal/desktop' \
@@ -30,19 +27,38 @@
         until [[ -S $bus ]]; do sleep 0.05; done
         nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} -- cursor "$@"
       '';
-    };
-    claude-nono = pkgs.writeShellApplication {
-      name = "claude-nono";
-      runtimeInputs = [pkgs.claude-code];
-      text = ''
-        nono run --no-diagnostics --profile ${./claude/claude.profile.json} -- claude "$@"
+
+      cursorDarwin = ''
+        # macOS has no narrow way to open links: --login lets the sandbox use
+        # LaunchServices, which can also start any app outside the sandbox.
+        # Use it only to log in.
+        extra=()
+        if [[ ''${1-} == --login ]]; then shift; extra=(--allow-launch-services); fi
+        nono run --no-diagnostics "''${extra[@]}" --profile ${./cursor/cursor.profile.json} -- cursor "$@"
       '';
+
+      packagesFor = pkgs: rec {
+        cursor-nono = pkgs.writeShellApplication {
+          name = "cursor-nono";
+          runtimeInputs = [ pkgs.nono pkgs.code-cursor ]
+            ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.xdg-dbus-proxy;
+          text = if pkgs.stdenv.hostPlatform.isLinux then cursorLinux pkgs else cursorDarwin;
+        };
+        claude-nono = pkgs.writeShellApplication {
+          name = "claude-nono";
+          runtimeInputs = [ pkgs.nono pkgs.claude-code ];
+          text = ''
+            nono run --no-diagnostics --profile ${./claude/claude.profile.json} -- claude "$@"
+          '';
+        };
+        default = cursor-nono;
+      };
+    in {
+      packages = forAllSystems packagesFor;
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.mkShell {
+          packages = with packagesFor pkgs; [ cursor-nono claude-nono ];
+        };
+      });
     };
-  in {
-    packages.x86_64-linux = {
-      inherit cursor-nono claude-nono;
-      default = cursor-nono;
-    };
-    devShells.x86_64-linux.default = pkgs.mkShell {packages = [cursor-nono claude-nono];};
-  };
 }
