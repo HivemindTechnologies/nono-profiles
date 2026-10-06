@@ -18,15 +18,15 @@ Linux is tested. macOS is **experimental**: untested so far, see
 |--------------------|-------------------------------|
 | `HOME`             | `<project>/.cursor-nono/home` |
 | data dir           | `<project>/.cursor-nono/data` |
-| `TMPDIR`           | `<project>/.cursor-nono`      |
+| `TMPDIR`           | `<project>/.cursor-nono/tmp`  |
 
 Cursor keeps login, settings, chats, extensions, `mcp.json` and hooks
 there. Your real Cursor data stays untouched, so the sandbox cannot plant
 hooks that an unsandboxed Cursor would run. Each project needs its own
 login.
 
-Cursor creates these dirs itself. nono grants only paths that exist, but the
-only grant here is the project dir.
+The launcher (`flake.nix`) creates these dirs. Cursor does not create
+`TMPDIR` itself: on macOS, it did not start without it.
 
 ## Opening Links
 

@@ -18,7 +18,9 @@
         # gdbus (used by xdg-open) also needs Introspect to learn the argument types.
         # The socket lives in the project dir, where the profile allows sockets.
         bus=$PWD/.cursor-nono/bus
-        mkdir -p "$PWD/.cursor-nono"
+        # The profile points HOME, the data dir and TMPDIR into .cursor-nono.
+        # Cursor does not create TMPDIR, so we create all three.
+        mkdir -p "$PWD/.cursor-nono/home" "$PWD/.cursor-nono/data" "$PWD/.cursor-nono/tmp"
         rm -f "$bus"
         xdg-dbus-proxy "''${DBUS_SESSION_BUS_ADDRESS:?}" "$bus" --filter \
           --call='org.freedesktop.portal.Desktop=org.freedesktop.portal.OpenURI.OpenURI@/org/freedesktop/portal/desktop' \
@@ -29,6 +31,9 @@
       '';
 
       cursorDarwin = pkgs: ''
+        # The profile points HOME, the data dir and TMPDIR into .cursor-nono.
+        # Cursor does not create TMPDIR, so we create all three.
+        mkdir -p "$PWD/.cursor-nono/home" "$PWD/.cursor-nono/data" "$PWD/.cursor-nono/tmp"
         # macOS has no narrow way to open links: --login lets the sandbox use
         # LaunchServices, which can also start any app outside the sandbox.
         # Use it only to log in.

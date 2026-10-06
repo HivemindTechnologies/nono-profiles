@@ -39,7 +39,7 @@
     ],
     "set_vars": {
       "HOME": "$WORKDIR/.cursor-nono/home",
-      "TMPDIR": "$WORKDIR/.cursor-nono",
+      "TMPDIR": "$WORKDIR/.cursor-nono/tmp",
       "GIT_CONFIG_GLOBAL": "$HOME/.config/git/config",
       "GIT_CONFIG_COUNT": "1",
       "GIT_CONFIG_KEY_0": "core.excludesFile",

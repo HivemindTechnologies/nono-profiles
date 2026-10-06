@@ -24,8 +24,8 @@ terminal output when something failed. Also your macOS version and chip.
 
 1. Run `cursor-nono --login`. Does the window open? Click "Log In": does
    your browser open, and does the login finish?
-2. `ls ~/nono-test/.cursor-nono` shows `home` and `data`, and `data` is
-   not empty.
+2. `ls ~/nono-test/.cursor-nono` shows `home`, `data` and `tmp`, and
+   `data` is not empty.
 3. Quit Cursor. Run `cursor-nono` (without `--login`). Are you still logged
    in?
 4. In this run, open any link (Help → Documentation). Expected: nothing
