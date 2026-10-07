@@ -18,9 +18,8 @@ on your PATH. It prints the `nono run` command it executes.
 
 - **Linux**: the login page opens in your browser.
 - **macOS**: if the login page does not open, copy the URL Claude prints.
-  Claude Code keeps its login in the keychain, which nono blocks. If the
-  login does not stick, create a token outside the sandbox with
-  `claude setup-token` and export it as `CLAUDE_CODE_OAUTH_TOKEN`.
+  nono blocks the keychain, so Claude stores the login in
+  `~/.claude/.credentials.json`, as on Linux.
 
 ## Access
 
