@@ -19,6 +19,9 @@ Each wrapper runs `nono run --profile <profile> -- <tool>` and prints that
 command first. Details per tool: [`cursor/README.md`](cursor/README.md),
 [`claude/README.md`](claude/README.md).
 
+macOS: Cursor needs one extra step to log in, see "Log In" in
+[`cursor/README.md`](cursor/README.md#log-in).
+
 The dev shell also has plain `nono`, `claude` and `cursor`, to debug the
 wrappers. **Alone, `claude` and `cursor` run unsandboxed.**
 
