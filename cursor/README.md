@@ -24,8 +24,7 @@ Each project needs its own login.
 - **macOS**: links do not open in `cursor-nono`. To log in once, run
   `cursor-nono-allow-launch-services`, log in, quit, and start again with
   `cursor-nono`. That command lets the sandbox start any app outside of it,
-  so use it only to log in. nono blocks the keychain, so the login may not
-  survive a restart.
+  so use it only to log in.
 
 ## Own Home per Project
 
