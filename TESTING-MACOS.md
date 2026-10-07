@@ -14,17 +14,6 @@ What matters when iterating:
    (`.cursor-nono/` is the sandboxed home/data/tmp).
 2. **Tool stays usable** — window paints, typing/scrolling work, login is
    possible when required. GPU may stay off (`--disable-gpu`).
-3. **Isolation of the develop shell** — `nix develop` exposes only
-   `cursor-nono` / `claude-nono`, not raw host or nix `cursor`/`nono` on PATH.
-   Debug runs resolve store paths from the wrapper (`test.sh`); do not widen
-   the shell PATH “for convenience”.
-4. **Debug loop** — when Seatbelt kills or blanks the UI, evolve
-   `cursor/cursor.profile.json` (esp. `platform_overrides.macos`) and
-   [`test.sh`](./test.sh) together; keep verbose logs under
-   `.cursor-nono/debug/` (gitignored). Prefer least privilege: grant only
-   what nono’s “Also blocked” / crash path proves is needed.
-5. **Portable procedure** — same steps inside `nix develop` for every
-   tester; do not jump out of the shell for the Seatbelt debug path.
 
 Success for a macOS pass: usable Cursor/Claude under nono **and** the escape
 checks in the numbered sections below all fail as specified.
@@ -45,28 +34,7 @@ output, macOS version, and chip.
 
    The first `nix develop` downloads Cursor, Claude Code and nono.
 
-   Stay inside `nix develop` for the steps below. The develop shell exposes
-   only `cursor-nono` and `claude-nono` (not raw `cursor` / `nono`) so a host
-   install cannot shadow the nix app. Do not put those binaries on PATH.
-
-## Raw `nono run` (Seatbelt debug)
-
-Use this when Cursor dies or shows a blank window under the sandbox. The
-commands live in [`test.sh`](./test.sh) so we can evolve them with the
-profile. Run from the **repo root**, inside `nix develop`:
-
-```sh
-./test.sh                 # Ctrl+C when done / hung
-TIME_LIMIT=45 ./test.sh   # auto-stop (GNU timeout from nix)
-```
-
-Logs go to `.cursor-nono/debug/run-*.{nono,seatbelt}.log` (gitignored). The
-script prints greps + a short tail; send Johannes the `run-*` files (or that
-summary).
-
-`test.sh` resolves nix Cursor/`nono` from the `cursor-nono` wrapper (no PATH
-exposure) and unsets host `CURSOR_LAYOUT` so Glass/unifiedAgent from your
-normal Cursor does not leak into the sandbox.
+   Stay inside `nix develop` for the steps below.
 
 ## Cursor
 
