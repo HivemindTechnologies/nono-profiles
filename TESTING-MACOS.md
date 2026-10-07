@@ -1,11 +1,36 @@
 # Testing on macOS
 
-Goal: find out whether the Cursor and Claude Code sandboxes work on macOS
-(Apple Silicon), and whether they hold. About 30 minutes. Nothing here
-changes your normal Cursor or Claude Code setup.
+## Intent (read this first)
 
-Please send back, for every numbered step: worked / failed, plus the
-terminal output when something failed. Also your macOS version and chip.
+This repo ships **nono profiles + flake wrappers** so Cursor / Claude Code can
+only touch the project dir (and a short allow-list), not the rest of the Mac.
+macOS is experimental; Linux is the reference.
+
+What matters when iterating:
+
+1. **Security holds** — from inside the sandboxed tool, escapes must fail
+   (home dirs, LaunchServices `open -a`, launchctl/osascript, host unix
+   sockets). Host Cursor / Claude Code must stay untouched
+   (`.cursor-nono/` is the sandboxed home/data/tmp).
+2. **Tool stays usable** — window paints, typing/scrolling work, login is
+   possible when required. GPU may stay off (`--disable-gpu`).
+3. **Isolation of the develop shell** — `nix develop` exposes only
+   `cursor-nono` / `claude-nono`, not raw host or nix `cursor`/`nono` on PATH.
+   Debug runs resolve store paths from the wrapper (`test.sh`); do not widen
+   the shell PATH “for convenience”.
+4. **Debug loop** — when Seatbelt kills or blanks the UI, evolve
+   `cursor/cursor.profile.json` (esp. `platform_overrides.macos`) and
+   [`test.sh`](./test.sh) together; keep verbose logs under
+   `.cursor-nono/debug/` (gitignored). Prefer least privilege: grant only
+   what nono’s “Also blocked” / crash path proves is needed.
+5. **Portable procedure** — same steps inside `nix develop` for every
+   tester; do not jump out of the shell for the Seatbelt debug path.
+
+Success for a macOS pass: usable Cursor/Claude under nono **and** the escape
+checks in the numbered sections below all fail as specified.
+
+About 30 minutes for a full pass. Report worked / failed per step, failure
+output, macOS version, and chip.
 
 ## Setup
 
@@ -26,63 +51,22 @@ terminal output when something failed. Also your macOS version and chip.
 
 ## Raw `nono run` (Seatbelt debug)
 
-Use this when Cursor dies under the sandbox and you need exit codes, nono's
-"Sandbox blocked system services" list, kernel Seatbelt lines, and any crash
-report. Run it from the **repo root**, inside `nix develop`. Resolve the nix
-Cursor app binary and `nono` from the `cursor-nono` wrapper (same store paths
-the launcher uses) without exposing them on the shell PATH:
-
-Verbose Cursor/Chromium output floods the terminal; write everything under
-`.cursor-nono/debug/` (gitignored with the rest of `.cursor-nono/`) and only
-print a short summary. If Cursor hangs with a window, stop it (Ctrl+C) or let
-the optional timeout fire so nono's footer is flushed to the log.
+Use this when Cursor dies or shows a blank window under the sandbox. The
+commands live in [`test.sh`](./test.sh) so we can evolve them with the
+profile. Run from the **repo root**, inside `nix develop`:
 
 ```sh
-W="$(command -v cursor-nono)"
-C="$(grep -oE '/nix/store/[^[:space:]"]+/Applications/Cursor.app/Contents/MacOS/Cursor' "$W" | head -1)"
-NONO="$(grep -oE '/nix/store/[^:[:space:]"]+-nono-[^/]+/bin' "$W" | head -1)/nono"
-ls -l "$C" && ls -l "$NONO"
-
-mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp .cursor-nono/debug
-RUN=".cursor-nono/debug/run-$(date +%Y%m%d-%H%M%S)"
-# Optional: TIME_LIMIT=45s to auto-stop a hung window (needs GNU timeout from nix).
-TIME_LIMIT="${TIME_LIMIT:-}"
-
-{
-  echo "=== nono run ==="
-  if [[ -n "$TIME_LIMIT" ]]; then
-    timeout --signal=INT --kill-after=5 "$TIME_LIMIT" \
-      "$NONO" run -v --profile cursor/cursor.profile.json -- "$C"
-  else
-    "$NONO" run -v --profile cursor/cursor.profile.json -- "$C"
-  fi
-  echo "exit $?"
-} >"$RUN.nono.log" 2>&1
-echo "wrote $RUN.nono.log"
-
-log show --last 2m --style compact --predicate 'sender == "Sandbox"' \
-  | grep -i cursor | head -50 >"$RUN.seatbelt.log" || true
-echo "wrote $RUN.seatbelt.log ($(wc -l <"$RUN.seatbelt.log") lines)"
-
-f=$(ls -t ~/Library/Logs/DiagnosticReports/Cursor* 2>/dev/null | head -1)
-echo "$f" >"$RUN.crash-path.txt"
-echo "crash report: ${f:-"(none)"}"
-# Tail of nono log for a quick look (full file is on disk)
-tail -n 80 "$RUN.nono.log"
+./test.sh                 # Ctrl+C when done / hung
+TIME_LIMIT=45 ./test.sh   # auto-stop (GNU timeout from nix)
 ```
 
-Send back the `.cursor-nono/debug/run-*.nono.log` (or at least its tail with
-"Sandbox blocked" / "Also blocked"), the seatbelt log, and whether a crash
-report path was recorded. Useful greps on the nono log:
+Logs go to `.cursor-nono/debug/run-*.{nono,seatbelt}.log` (gitignored). The
+script prints greps + a short tail; send Johannes the `run-*` files (or that
+summary).
 
-```sh
-rg -n "Also blocked|Sandbox denial|Failed to allocate IOSurface|FATAL:|exit " "$RUN.nono.log"
-rg -c "Failed to allocate IOSurface" "$RUN.nono.log"
-```
-
-Note: `dirname "$(command -v cursor)"/../Applications/...` is wrong on Macs
-that already have Cursor in `/usr/local/bin` — that is why this script reads
-paths from the wrapper instead.
+`test.sh` resolves nix Cursor/`nono` from the `cursor-nono` wrapper (no PATH
+exposure) and unsets host `CURSOR_LAYOUT` so Glass/unifiedAgent from your
+normal Cursor does not leak into the sandbox.
 
 ## Cursor
 
