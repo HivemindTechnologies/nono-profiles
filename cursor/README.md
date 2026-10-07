@@ -9,8 +9,7 @@ cursor-nono --login         # macOS only: first start, to log in
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
 
-Linux is tested. macOS is **experimental**: untested so far, see
-`../TESTING-MACOS.md`.
+Linux and macOS are tested. To re-test macOS, see `../TESTING-MACOS.md`.
 
 ## Own Home per Project
 

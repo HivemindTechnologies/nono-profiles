@@ -7,8 +7,7 @@ claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cur
 
 `claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude` on your PATH.
 
-Linux is tested. macOS is **experimental**: untested so far, see
-`../TESTING-MACOS.md`.
+Linux and macOS are tested. To re-test macOS, see `../TESTING-MACOS.md`.
 
 ## Access
 

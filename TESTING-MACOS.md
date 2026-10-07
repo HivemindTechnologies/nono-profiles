@@ -4,7 +4,6 @@
 
 This repo ships **nono profiles + flake wrappers** so Cursor / Claude Code can
 only touch the project dir (and a short allow-list), not the rest of the Mac.
-macOS is experimental; Linux is the reference.
 
 What matters when iterating:
 

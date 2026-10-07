@@ -18,8 +18,8 @@ debug that call. `claude` or `cursor` alone runs **unsandboxed**.
 The flake pins nono, Cursor and Claude Code (`flake.lock`); `nix flake update`
 updates them.
 
-Linux is tested. macOS (Apple Silicon) is **experimental**: each profile has
-a `platform_overrides.macos` section, but nobody has run it yet. See
+Linux and macOS (Apple Silicon) are tested. macOS settings live in each
+profile's `platform_overrides.macos` section. To re-test macOS, see
 `TESTING-MACOS.md`.
 
 Each profile is self-contained: it extends only nono's built-in `default`.
