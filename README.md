@@ -1,35 +1,34 @@
 # nono Sandboxes for Cursor and Claude Code
 
 Run AI coding tools in a [nono](https://nono.sh) sandbox, so that code they
-write or run cannot touch the rest of your machine.
+write or run cannot touch the rest of your machine. Linux and macOS (Apple
+Silicon) are tested.
+
+## Start
 
 Start from the project dir. The sandbox can write only that dir.
 
 ```sh
-nix develop ~/workbench/cursor-nono   # cursor-nono, claude-nono; plain nono, claude, cursor
+nix develop ~/workbench/cursor-nono
 cd ~/workbench/my-project
 cursor-nono
 claude-nono --dangerously-skip-permissions
 ```
 
-Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`
-and prints that command before it runs.
-The shell also provides plain `nono`, `claude` and `cursor`, to show and
-debug that call. `claude` or `cursor` alone runs **unsandboxed**.
-The flake pins nono, Cursor and Claude Code (`flake.lock`); `nix flake update`
-updates them.
+Each wrapper runs `nono run --profile <profile> -- <tool>` and prints that
+command first. Details per tool: [`cursor/README.md`](cursor/README.md),
+[`claude/README.md`](claude/README.md).
 
-Linux and macOS (Apple Silicon) are tested. macOS settings live in each
-profile's `platform_overrides.macos` section. To test, see "Test It"
-in each tool's README.
+The dev shell also has plain `nono`, `claude` and `cursor`, to debug the
+wrappers. **Alone, `claude` and `cursor` run unsandboxed.**
 
-Each profile is self-contained: it extends only nono's built-in `default`.
-Cursor needs a small launcher (`flake.nix`) so that it can open links.
+Nix does not work inside the sandbox. Start the tool from a dev shell
+(`nix develop -c ...`) to give it the project's tools.
 
 ## Goal: Secure, but Pragmatic
 
 Nothing inside the sandbox may run code outside of it. The Claude Code
-sandbox breaks this on purpose; see its README.
+sandbox breaks this on purpose; see "Known Gaps" in its README.
 
 Both sandboxes block:
 
@@ -46,8 +45,4 @@ Both sandboxes allow, to keep daily work smooth:
 - **Shared `/tmp`** (without sockets). Sandbox and host can read and change
   each other's temp files.
 
-Nix does not work inside. Start the tool from a dev shell
-(`nix develop -c ...`) to give it the project's tools.
-
-Use `nono run`, not `nono wrap`: only `nono run` keeps the supervisor
-process that enforces the socket rules.
+Why things are built this way: [`DESIGN.md`](DESIGN.md).

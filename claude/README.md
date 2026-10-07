@@ -1,13 +1,26 @@
 # Claude Code in a nono Sandbox
 
+Claude Code runs in a nono sandbox that can write the dir you start it in,
+plus Claude's own config and your build caches.
+
+## Start
+
 ```sh
+nix develop ~/workbench/cursor-nono
 cd ~/workbench/my-project
-claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cursor-nono`
+claude-nono --dangerously-skip-permissions
 ```
 
-`claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude` on your PATH.
+`claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude`
+on your PATH. It prints the `nono run` command it executes.
 
-Linux and macOS are tested.
+## Log In
+
+- **Linux**: the login page opens in your browser.
+- **macOS**: if the login page does not open, copy the URL Claude prints.
+  Claude Code keeps its login in the keychain, which nono blocks. If the
+  login does not stick, create a token outside the sandbox with
+  `claude setup-token` and export it as `CLAUDE_CODE_OAUTH_TOKEN`.
 
 ## Access
 
@@ -15,13 +28,17 @@ Linux and macOS are tested.
 |-----------------|----------------------------------------------------------------|
 | read + write    | the project dir, `/tmp` (no sockets)                           |
 | read + write    | `~/.claude`, `~/.claude.json`, Claude's cache and state dirs   |
-| read + write    | build caches: `~/.cargo`, `~/.rustup`, `~/.sbt`, `~/.ivy2`, `~/.npm`, `~/.cache/uv`; Linux: `~/.cache/coursier`, `~/.local/share/pnpm`, `~/.cache/pip`; macOS: `~/Library/Caches/Coursier`, `~/Library/pnpm`, `~/Library/Caches/pip` |
+| read + write    | build caches: `~/.cargo`, `~/.rustup`, `~/.sbt`, `~/.ivy2`, `~/.npm`, `~/.cache/uv` |
+| read + write    | Linux: `~/.cache/coursier`, `~/.local/share/pnpm`, `~/.cache/pip` |
+| read + write    | macOS: `~/Library/Caches/Coursier`, `~/Library/pnpm`, `~/Library/Caches/pip` |
 | read            | `/nix/store`, your git config, `/etc/passwd`, `/etc/group`     |
 | unix sockets    | Linux: `/run/nscd/socket`; macOS: DNS (mDNSResponder)          |
 | network         | everything                                                     |
-| open in browser | login pages of claude.ai and Anthropic (Linux)                 |
+| open in browser | Linux: login pages of claude.ai and Anthropic                  |
 
-## Shortcuts: the Sandbox Can Escape
+## Known Gaps
+
+Both gaps let the sandbox run code outside of it:
 
 - **Build caches are shared with your host.** The sandbox can replace
   `~/.cargo/bin/cargo` or a cached package; your next build outside runs
@@ -35,10 +52,6 @@ Linux and macOS are tested.
 - nix commands, `git push` over ssh, pasting images.
 - A cache dir that does not exist yet: create it once on the host
   (`mkdir ~/.cache/uv`).
-- macOS: Claude Code keeps its login in the keychain, which nono blocks.
-  If the login does not stick, create a token outside the sandbox with
-  `claude setup-token` and export it as `CLAUDE_CODE_OAUTH_TOKEN`. If the
-  login page does not open, copy the URL Claude prints.
 
 ## Test It
 

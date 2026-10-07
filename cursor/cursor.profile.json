@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "cursor",
-    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, tmux) are blocked. The project dir is the current directory ($WORKDIR); Cursor's HOME, data dir and TMPDIR live in $WORKDIR/.cursor-nono. Start via the flake's cursor-nono. See README.md for why each grant exists."
+    "description": "Cursor IDE (Electron GUI). Self-contained: extends only nono's built-in `default`. Host unix sockets (D-Bus, nix-daemon, ssh-agent, tmux) are blocked. The project dir is the current directory ($WORKDIR); Cursor's HOME, data dir and TMPDIR live in $WORKDIR/.cursor-nono. Start via the flake's cursor-nono. See DESIGN.md for why each grant exists."
   },
   "extends": "default",
   "groups": {
