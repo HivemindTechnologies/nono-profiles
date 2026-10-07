@@ -20,6 +20,41 @@ terminal output when something failed. Also your macOS version and chip.
 
    The first `nix develop` downloads Cursor, Claude Code and nono.
 
+   Stay inside `nix develop` for the steps below. The develop shell exposes
+   only `cursor-nono` and `claude-nono` (not raw `cursor` / `nono`) so a host
+   install cannot shadow the nix app. Do not put those binaries on PATH.
+
+## Raw `nono run` (Seatbelt debug)
+
+Use this when Cursor dies under the sandbox and you need exit codes, nono's
+"Sandbox blocked system services" list, kernel Seatbelt lines, and any crash
+report. Run it from the **repo root**, inside `nix develop`. Resolve the nix
+Cursor app binary and `nono` from the `cursor-nono` wrapper (same store paths
+the launcher uses) without exposing them on the shell PATH:
+
+```sh
+W="$(command -v cursor-nono)"
+C="$(grep -oE '/nix/store/[^[:space:]"]+/Applications/Cursor.app/Contents/MacOS/Cursor' "$W" | head -1)"
+NONO="$(grep -oE '/nix/store/[^:[:space:]"]+-nono-[^/]+/bin' "$W" | head -1)/nono"
+ls -l "$C" && ls -l "$NONO"
+
+mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp
+"$NONO" run -v --profile cursor/cursor.profile.json -- "$C"; echo "exit $?"
+
+# Seatbelt denials from the last 2 minutes (run immediately after)
+log show --last 2m --style compact --predicate 'sender == "Sandbox"' | grep -i cursor | head -50
+
+# Newest crash report, opened in Console (often empty under Seatbelt)
+f=$(ls -t ~/Library/Logs/DiagnosticReports/Cursor* 2>/dev/null | head -1); echo "$f"; [ -n "$f" ] && open -a Console "$f"
+```
+
+Send back: `exit $?`, the full nono footer (especially "Sandbox blocked system
+services"), the `log show` lines, and whether `f` was empty.
+
+Note: `dirname "$(command -v cursor)"/../Applications/...` is wrong on Macs
+that already have Cursor in `/usr/local/bin` — that is why this script reads
+paths from the wrapper instead.
+
 ## Cursor
 
 1. Run `cursor-nono --login`. Does the window open? Click "Log In": does

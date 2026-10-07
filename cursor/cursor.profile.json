@@ -91,7 +91,13 @@
         "(deny network-outbound (regex \"^/\"))",
         "(allow network-outbound (path \"/private/var/run/mDNSResponder\"))",
         "(allow network-outbound (path \"/var/run/mDNSResponder\"))",
-        "(allow network-outbound (regex \"/[.]cursor-nono/\"))"
+        "(allow network-outbound (regex \"/[.]cursor-nono/\"))",
+        "(allow user-preference-read)",
+        "(allow user-preference-write)",
+        "(allow file-issue-extension)",
+        "(allow iokit-open-user-client (iokit-user-client-class \"RootDomainUserClient\"))",
+        "(allow mach-register)",
+        "(allow mach-lookup)"
       ],
       "command_args": [
         "--no-sandbox"
