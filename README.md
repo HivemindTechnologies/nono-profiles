@@ -6,13 +6,15 @@ write or run cannot touch the rest of your machine.
 Start from the project dir. The sandbox can write only that dir.
 
 ```sh
-nix develop ~/workbench/cursor-nono   # provides cursor-nono and claude-nono
+nix develop ~/workbench/cursor-nono   # cursor-nono, claude-nono; plain nono, claude, cursor
 cd ~/workbench/my-project
 cursor-nono
 claude-nono --dangerously-skip-permissions
 ```
 
 Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`.
+The shell also provides plain `nono`, `claude` and `cursor`, to show and
+debug that call. `claude` or `cursor` alone runs **unsandboxed**.
 The flake pins nono, Cursor and Claude Code (`flake.lock`); `nix flake update`
 updates them.
 

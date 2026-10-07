@@ -66,7 +66,11 @@
       packages = forAllSystems packagesFor;
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          packages = with packagesFor pkgs; [ cursor-nono claude-nono ];
+          # The plain tools are here to show and debug what the wrappers do,
+          # e.g. `nono run --profile <profile> -- claude`. Typing `claude` or
+          # `cursor` alone starts them unsandboxed.
+          packages = with packagesFor pkgs; [ cursor-nono claude-nono ]
+            ++ [ pkgs.nono pkgs.claude-code pkgs.code-cursor ];
         };
       });
     };

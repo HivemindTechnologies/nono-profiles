@@ -39,7 +39,7 @@ output, macOS version, and chip.
 2. Get this repo to `~/cursor-nono`, then:
 
    ```sh
-   cd ~/cursor-nono && nix develop   # provides cursor-nono and claude-nono
+   cd ~/cursor-nono && nix develop   # cursor-nono, claude-nono; plain nono, claude, cursor
    mkdir -p ~/nono-test && cd ~/nono-test && git init
    ```
 
