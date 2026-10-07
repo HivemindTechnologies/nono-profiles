@@ -4,8 +4,9 @@
 cd ~/workbench/my-project   # per project: sees only my-project
 cd ~/workbench              # broad: sees all projects
 cursor-nono                 # from `nix develop ~/workbench/cursor-nono`
-cursor-nono --login         # macOS only: first start, to log in
 ```
+
+`cursor-nono` prints the `nono run` command it executes.
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
 
@@ -33,9 +34,11 @@ The launcher (`flake.nix`) creates these dirs. Cursor does not create
   `.cursor-nono/bus`. It passes on only the desktop portal's `OpenURI` call
   (plus read-only `Introspect`), which opens the link in your default
   browser. Everything else on D-Bus stays blocked.
-- **macOS**: there is no narrow way. `cursor-nono --login` lets the sandbox
-  use LaunchServices, which opens links but can also start any app outside
-  the sandbox. Use it only to log in; without it, links do not open.
+- **macOS**: there is no narrow way, so links do not open. To log in once,
+  copy the command `cursor-nono` prints and add `--allow-launch-services`
+  after `nono run`. This lets the sandbox use LaunchServices, which opens
+  links but can also start any app outside the sandbox. Quit Cursor after
+  login and start it again with `cursor-nono`.
 
 nono's own `open_urls` does not work for Cursor: on Linux nono deadlocks
 when its link helper runs under `af_unix_mediation`, and on macOS Electron
@@ -51,8 +54,8 @@ Cursor then shows a white window and dies.
 
 On macOS the launcher skips `cursor` and runs
 `Cursor.app/Contents/MacOS/Cursor` directly: `cursor` starts the app through
-`open` (LaunchServices), which nono blocks (error -54) or, with `--login`,
-which starts Cursor outside the sandbox.
+`open` (LaunchServices), which nono blocks (error -54) or, with
+`--allow-launch-services`, which starts Cursor outside the sandbox.
 
 ## Rate Limit on Sockets (Linux)
 
@@ -68,7 +71,7 @@ system-bus attempts at startup.
 | read + write    | the project dir, `/tmp` (no sockets), `/proc`  | the project dir, `/tmp`        |
 | read            | `/etc`, `/nix/store`, git config, CPU info     | system paths, `/nix/store`, git config |
 | unix sockets    | own sockets in the project dir; Wayland; nscd  | `.cursor-nono/` dirs; DNS (mDNSResponder) |
-| D-Bus / LaunchServices | only the portal's `OpenURI`             | only with `--login`            |
+| D-Bus / LaunchServices | only the portal's `OpenURI`             | only for login (see above)     |
 | network         | everything                                     | everything                     |
 
 ## Shortcuts
@@ -77,7 +80,7 @@ system-bus attempts at startup.
   other windows and read the clipboard; the display is fixed to `wayland-1`.
   On macOS it can read the clipboard.
 - **Links**: sandboxed code can open any link in your browser (Linux), or
-  any app during `--login` (macOS).
+  any app during the login run (macOS).
 - **Login in the project dir**: other sandboxes on the project (Claude Code)
   can read it.
 - **macOS**: Chromium's own sandbox is off (`--no-sandbox`), because it

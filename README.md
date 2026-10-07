@@ -12,7 +12,8 @@ cursor-nono
 claude-nono --dangerously-skip-permissions
 ```
 
-Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`.
+Each command is a thin wrapper around `nono run --profile <profile> -- <tool>`
+and prints that command before it runs.
 The shell also provides plain `nono`, `claude` and `cursor`, to show and
 debug that call. `claude` or `cursor` alone runs **unsandboxed**.
 The flake pins nono, Cursor and Claude Code (`flake.lock`); `nix flake update`

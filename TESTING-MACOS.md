@@ -37,12 +37,12 @@ output, macOS version, and chip.
 
 ## Cursor
 
-1. Run `cursor-nono --login`. Does the window open? Click "Log In": does
-   your browser open, and does the login finish?
+1. Run `cursor-nono` and quit it. Run the `nono run ...` command it printed,
+   with `--allow-launch-services` added after `nono run`. Does the window
+   open? Click "Log In": does your browser open, and does the login finish?
 2. `ls ~/nono-test/.cursor-nono` shows `home`, `data` and `tmp`, and
    `data` is not empty.
-3. Quit Cursor. Run `cursor-nono` (without `--login`). Are you still logged
-   in?
+3. Quit Cursor. Run `cursor-nono`. Are you still logged in?
 4. In this run, open any link (Help → Documentation). Expected: nothing
    opens.
 5. Still in this run, open Cursor's terminal (Ctrl+`). Each of these must

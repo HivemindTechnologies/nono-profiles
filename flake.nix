@@ -13,36 +13,27 @@
       }));
 
       cursorLinux = pkgs: ''
-        # nono cannot open links from a sandbox that filters unix sockets,
-        # so we expose a D-Bus proxy that allows only the portal's OpenURI call.
-        # gdbus (used by xdg-open) also needs Introspect to learn the argument types.
-        # The socket lives in the project dir, where the profile allows sockets.
+        # Cursor does not create the dirs the profile points to.
+        mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp
+        # A D-Bus proxy that only opens links (via the desktop portal).
         bus=$PWD/.cursor-nono/bus
-        # The profile points HOME, the data dir and TMPDIR into .cursor-nono.
-        # Cursor does not create TMPDIR, so we create all three.
-        mkdir -p "$PWD/.cursor-nono/home" "$PWD/.cursor-nono/data" "$PWD/.cursor-nono/tmp"
         rm -f "$bus"
         xdg-dbus-proxy "''${DBUS_SESSION_BUS_ADDRESS:?}" "$bus" --filter \
           --call='org.freedesktop.portal.Desktop=org.freedesktop.portal.OpenURI.OpenURI@/org/freedesktop/portal/desktop' \
           --call='org.freedesktop.portal.Desktop=org.freedesktop.DBus.Introspectable.Introspect@/org/freedesktop/portal/desktop' &
         trap 'kill $!' EXIT
         until [[ -S $bus ]]; do sleep 0.05; done
+        set -x
         nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} -- cursor "$@"
       '';
 
       cursorDarwin = pkgs: ''
-        # The profile points HOME, the data dir and TMPDIR into .cursor-nono.
-        # Cursor does not create TMPDIR, so we create all three.
-        mkdir -p "$PWD/.cursor-nono/home" "$PWD/.cursor-nono/data" "$PWD/.cursor-nono/tmp"
-        # macOS has no narrow way to open links: --login lets the sandbox use
-        # LaunchServices, which can also start any app outside the sandbox.
-        # Use it only to log in.
-        extra=()
-        if [[ ''${1-} == --login ]]; then shift; extra=(--allow-launch-services); fi
-        # We run the app binary itself: bin/cursor would start Cursor through
-        # `open` (LaunchServices), which nono blocks, or which, with --login,
-        # starts Cursor outside the sandbox.
-        nono run --no-diagnostics "''${extra[@]}" --profile ${./cursor/cursor.profile.json} \
+        # Cursor does not create the dirs the profile points to.
+        mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp
+        # bin/cursor starts the app via `open`, which nono blocks.
+        # So we run the app binary directly.
+        set -x
+        nono run --no-diagnostics --profile ${./cursor/cursor.profile.json} \
           -- ${pkgs.code-cursor}/Applications/Cursor.app/Contents/MacOS/Cursor "$@"
       '';
 
@@ -57,6 +48,7 @@
           name = "claude-nono";
           runtimeInputs = [ pkgs.nono pkgs.claude-code ];
           text = ''
+            set -x
             nono run --no-diagnostics --profile ${./claude/claude.profile.json} -- claude "$@"
           '';
         };
@@ -66,9 +58,7 @@
       packages = forAllSystems packagesFor;
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          # The plain tools are here to show and debug what the wrappers do,
-          # e.g. `nono run --profile <profile> -- claude`. Typing `claude` or
-          # `cursor` alone starts them unsandboxed.
+          # Plain tools, to debug the wrappers. Alone, they run unsandboxed.
           packages = with packagesFor pkgs; [ cursor-nono claude-nono ]
             ++ [ pkgs.nono pkgs.claude-code pkgs.code-cursor ];
         };
