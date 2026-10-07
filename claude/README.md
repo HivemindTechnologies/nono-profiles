@@ -7,7 +7,7 @@ claude-nono --dangerously-skip-permissions   # from `nix develop ~/workbench/cur
 
 `claude-nono` runs Claude Code from this flake's nixpkgs, not the `claude` on your PATH.
 
-Linux and macOS are tested. To re-test macOS, see `../TESTING-MACOS.md`.
+Linux and macOS are tested.
 
 ## Access
 
@@ -42,5 +42,16 @@ Linux and macOS are tested. To re-test macOS, see `../TESTING-MACOS.md`.
 
 ## Test It
 
-These must fail: `ls ~/.ssh`, `touch ~/.bashrc`, `busctl --user list`.
-These must work: `git status`, `cargo build`, `touch /tmp/x`.
+1. These must fail: `ls ~/.ssh`, `touch ~/.bashrc`, `busctl --user list`.
+2. These must work: `git status`, `cargo build`, `touch /tmp/x`.
+3. macOS: these must fail as well:
+
+   ```sh
+   open -a Calculator
+   launchctl submit -l nono-escape -- /usr/bin/touch /Users/$USER/nono-escaped
+   osascript -e "tell application \"Terminal\" to do script \"touch /Users/$USER/nono-escaped\""
+   for s in $(find /private/tmp -type s 2>/dev/null); do nc -U "$s" </dev/null && echo "REACHED $s"; done
+   ```
+
+   Then, outside the sandbox: `ls ~/nono-escaped` must report "No such
+   file"; clean up with `launchctl remove nono-escape`.

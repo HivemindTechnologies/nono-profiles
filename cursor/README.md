@@ -10,7 +10,7 @@ cursor-nono                 # from `nix develop ~/workbench/cursor-nono`
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
 
-Linux and macOS are tested. To re-test macOS, see `../TESTING-MACOS.md`.
+Linux and macOS are tested.
 
 ## Own Home per Project
 
@@ -96,13 +96,24 @@ system-bus attempts at startup.
 - The desktop entry and `cursor://` links start an unsandboxed Cursor.
 - macOS: nono blocks the keychain, so the login may not survive a restart.
 
-## Test It (Linux)
+## Test It
 
-1. In a fresh `/tmp/cursor-test`, run `cursor-nono`:
-   the window opens. "Log In" opens your browser.
-2. In the terminal, these must fail: `ls /home/$USER/.ssh`,
-   `ls /home/$USER/workbench`, `busctl --user list`.
+1. In a fresh `/tmp/cursor-test`, run `cursor-nono`: the window opens.
+   Log in (see "Opening Links"), quit, start again: still logged in.
+2. In Cursor's terminal, these must fail: `ls /home/$USER/.ssh`,
+   `ls /home/$USER/workbench`, `busctl --user list` (macOS: `/Users/$USER`).
 3. `git config user.name` prints your name.
+4. macOS: these must fail as well:
+
+   ```sh
+   open -a Calculator
+   launchctl submit -l nono-escape -- /usr/bin/touch /Users/$USER/nono-escaped
+   osascript -e "tell application \"Terminal\" to do script \"touch /Users/$USER/nono-escaped\""
+   for s in $(find /private/tmp -type s 2>/dev/null); do nc -U "$s" </dev/null && echo "REACHED $s"; done
+   ```
+
+   Then, outside the sandbox: `ls ~/nono-escaped` must report "No such
+   file"; clean up with `launchctl remove nono-escape`.
 
 For a shell in the sandbox, use `nono run --profile cursor/cursor.profile.json
 -- sh -c sh` (`sh -c` ignores the Cursor flags the profile appends).
