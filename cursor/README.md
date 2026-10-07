@@ -21,13 +21,9 @@ Add `.cursor-nono/` to the project's `.gitignore`: it holds your login.
 Each project needs its own login.
 
 - **Linux**: click "Log In"; your browser opens.
-- **macOS**: links do not open in the sandbox. To log in once:
-  1. Run `cursor-nono` and quit it.
-  2. Run the command it printed, with `--allow-launch-services` added after
-     `nono run`. Log in.
-  3. Quit Cursor and start it again with `cursor-nono`.
-
-  `--allow-launch-services` lets the sandbox start any app outside of it,
+- **macOS**: links do not open in `cursor-nono`. To log in once, run
+  `cursor-nono-allow-launch-services`, log in, quit, and start again with
+  `cursor-nono`. That command lets the sandbox start any app outside of it,
   so use it only to log in. nono blocks the keychain, so the login may not
   survive a restart.
 
@@ -50,7 +46,7 @@ run.
 | read + write    | the project dir, `/tmp` (no sockets), `/proc`  | the project dir, `/tmp`        |
 | read            | `/etc`, `/nix/store`, git config, CPU info     | system paths, `/nix/store`, git config |
 | unix sockets    | own sockets in the project dir; Wayland; nscd  | `.cursor-nono/` dirs; DNS (mDNSResponder) |
-| open links      | yes, via the desktop portal                    | only with `--allow-launch-services` |
+| open links      | yes, via the desktop portal                    | only in `cursor-nono-allow-launch-services` |
 | network         | everything                                     | everything                     |
 
 ## Known Gaps
@@ -58,9 +54,8 @@ run.
 - **Display server**: on Linux (Wayland/Sway), sandboxed code can type into
   other windows and read the clipboard; the display is fixed to `wayland-1`.
   On macOS it can read the clipboard.
-- **Links**: on Linux, sandboxed code can open any link in your browser. On
-  macOS, while you log in with `--allow-launch-services`, it can start any
-  app.
+- **Links**: on Linux, sandboxed code can open any link in your browser. In
+  `cursor-nono-allow-launch-services` (macOS), it can start any app.
 - **Login in the project dir**: other sandboxes on the project (Claude Code)
   can read it.
 - **macOS**: Chromium's own sandbox is off (`--no-sandbox`), because it

@@ -5,7 +5,8 @@ nono sandboxes for Cursor and Claude Code, shipped as a nix flake.
 ## File Structure
 
 ```
-flake.nix                  wrappers cursor-nono, claude-nono; dev shell
+flake.nix                  wrappers cursor-nono, claude-nono,
+                           cursor-nono-allow-launch-services (macOS); dev shell
 README.md                  user guide: start, goal (what is blocked/allowed)
 DESIGN.md                  why the flake and profiles look the way they do
 <tool>/<tool>.profile.json nono profile for one tool
@@ -28,7 +29,7 @@ A tool without design notes has no `DESIGN.md`.
 ## Wrappers (`flake.nix`)
 
 Keep them slim: create dirs, then `set -x` and `nono run ...`, so the user
-sees the exact command. No custom flags. Comments are one short,
+sees the exact command. No custom flags: a variant is its own wrapper. Comments are one short,
 human-readable line; longer reasons go into `DESIGN.md`.
 
 ## Testing
