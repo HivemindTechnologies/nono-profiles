@@ -6,6 +6,8 @@ cd ~/workbench              # broad: sees all projects
 cursor-nono                 # from `nix develop ~/workbench/cursor-nono`
 ```
 
+macOS: to log in, see "Opening Links".
+
 `cursor-nono` prints the `nono run` command it executes.
 
 Add `.cursor-nono/` to the project's `.gitignore`. It holds your login.
