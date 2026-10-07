@@ -32,24 +32,53 @@ report. Run it from the **repo root**, inside `nix develop`. Resolve the nix
 Cursor app binary and `nono` from the `cursor-nono` wrapper (same store paths
 the launcher uses) without exposing them on the shell PATH:
 
+Verbose Cursor/Chromium output floods the terminal; write everything under
+`.cursor-nono/debug/` (gitignored with the rest of `.cursor-nono/`) and only
+print a short summary. If Cursor hangs with a window, stop it (Ctrl+C) or let
+the optional timeout fire so nono's footer is flushed to the log.
+
 ```sh
 W="$(command -v cursor-nono)"
 C="$(grep -oE '/nix/store/[^[:space:]"]+/Applications/Cursor.app/Contents/MacOS/Cursor' "$W" | head -1)"
 NONO="$(grep -oE '/nix/store/[^:[:space:]"]+-nono-[^/]+/bin' "$W" | head -1)/nono"
 ls -l "$C" && ls -l "$NONO"
 
-mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp
-"$NONO" run -v --profile cursor/cursor.profile.json -- "$C"; echo "exit $?"
+mkdir -p .cursor-nono/home .cursor-nono/data .cursor-nono/tmp .cursor-nono/debug
+RUN=".cursor-nono/debug/run-$(date +%Y%m%d-%H%M%S)"
+# Optional: TIME_LIMIT=45s to auto-stop a hung window (needs GNU timeout from nix).
+TIME_LIMIT="${TIME_LIMIT:-}"
 
-# Seatbelt denials from the last 2 minutes (run immediately after)
-log show --last 2m --style compact --predicate 'sender == "Sandbox"' | grep -i cursor | head -50
+{
+  echo "=== nono run ==="
+  if [[ -n "$TIME_LIMIT" ]]; then
+    timeout --signal=INT --kill-after=5 "$TIME_LIMIT" \
+      "$NONO" run -v --profile cursor/cursor.profile.json -- "$C"
+  else
+    "$NONO" run -v --profile cursor/cursor.profile.json -- "$C"
+  fi
+  echo "exit $?"
+} >"$RUN.nono.log" 2>&1
+echo "wrote $RUN.nono.log"
 
-# Newest crash report, opened in Console (often empty under Seatbelt)
-f=$(ls -t ~/Library/Logs/DiagnosticReports/Cursor* 2>/dev/null | head -1); echo "$f"; [ -n "$f" ] && open -a Console "$f"
+log show --last 2m --style compact --predicate 'sender == "Sandbox"' \
+  | grep -i cursor | head -50 >"$RUN.seatbelt.log" || true
+echo "wrote $RUN.seatbelt.log ($(wc -l <"$RUN.seatbelt.log") lines)"
+
+f=$(ls -t ~/Library/Logs/DiagnosticReports/Cursor* 2>/dev/null | head -1)
+echo "$f" >"$RUN.crash-path.txt"
+echo "crash report: ${f:-"(none)"}"
+# Tail of nono log for a quick look (full file is on disk)
+tail -n 80 "$RUN.nono.log"
 ```
 
-Send back: `exit $?`, the full nono footer (especially "Sandbox blocked system
-services"), the `log show` lines, and whether `f` was empty.
+Send back the `.cursor-nono/debug/run-*.nono.log` (or at least its tail with
+"Sandbox blocked" / "Also blocked"), the seatbelt log, and whether a crash
+report path was recorded. Useful greps on the nono log:
+
+```sh
+rg -n "Also blocked|Sandbox denial|Failed to allocate IOSurface|FATAL:|exit " "$RUN.nono.log"
+rg -c "Failed to allocate IOSurface" "$RUN.nono.log"
+```
 
 Note: `dirname "$(command -v cursor)"/../Applications/...` is wrong on Macs
 that already have Cursor in `/usr/local/bin` — that is why this script reads

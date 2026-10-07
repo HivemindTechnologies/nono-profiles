@@ -96,6 +96,8 @@
         "(allow user-preference-write)",
         "(allow file-issue-extension)",
         "(allow iokit-open-user-client (iokit-user-client-class \"RootDomainUserClient\"))",
+        "(allow iokit-open-user-client (iokit-user-client-class \"IOSurfaceRootUserClient\"))",
+        "(allow iokit-open-user-client (iokit-user-client-class \"IOHIDParamUserClient\"))",
         "(allow mach-register)",
         "(allow mach-lookup)"
       ],
